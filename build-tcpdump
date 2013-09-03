@@ -18,12 +18,12 @@
 # --------------------------------------
 
 # default, edit version 
-tcpdump_ver=4.3.0
-libpcap_ver=1.3.0
-android_api_def=8
+tcpdump_ver=4.4.0
+libpcap_ver=1.4.0
+android_api_def=9
 
 #-------------------------------------------------------#
-ndk_dir_def=android-ndk-r8
+ndk_dir_def=android-ndk-r9
 
 tcpdump_dir=tcpdump-${tcpdump_ver}
 libpcap_dir=libpcap-${libpcap_ver}
