@@ -1,0 +1,241 @@
+#!/bin/sh
+
+# --------------------------------------
+#
+#     Title: build-tcpdump
+#    Author: Loic Poulain, loic.poulain@gmail.com
+#
+#   Purpose: download & build tcpdump for arm android platform
+#
+# You have to define your android NDK directory before calling this script
+# example:
+# $ export NDK=/home/Workspace/android-ndk-r8
+# $ sh build-tcpdump
+#
+# functionnal
+# 	with tcpdump 4.3.0, 4.2.1
+# 	with android-ndk-r8
+# --------------------------------------
+
+# default, edit version 
+tcpdump_ver=4.3.0
+libpcap_ver=1.3.0
+android_api_def=8
+
+#-------------------------------------------------------#
+ndk_dir_def=android-ndk-r8
+
+tcpdump_dir=tcpdump-${tcpdump_ver}
+libpcap_dir=libpcap-${libpcap_ver}
+
+
+if [ ${NDK} ]
+then
+	ndk_dir=${NDK}
+else
+	ndk_dir=${ndk_dir_def}
+fi
+
+ndk_dir=`readlink -f ${ndk_dir}`
+
+if [ ${ANDROID_API} ]
+then
+	android_api=${ANDROID_API}
+else
+	android_api=${android_api_def}
+fi
+
+echo "_______________________"
+echo ""
+echo "NDK - ${ndk_dir}"
+echo "Android API: ${android_api}"
+echo "_______________________"
+
+
+exit_error()
+{
+	echo " _______"
+	echo "|       |"
+	echo "| ERROR |"
+	echo "|_______|"
+	exit 1
+}
+
+{
+	if [ $# -ne 0 ]
+	then
+		if [ -d $1 ]
+		then
+			cd $1
+		else
+			echo directory $1 not found
+			exit_error
+		fi
+	else
+		mkdir tcpdumpbuild
+		cd tcpdumpbuild
+	fi
+}
+
+
+
+# create env
+{
+	echo " ____________________"
+	echo "|                    |"
+	echo "| CREATING TOOLCHAIN |"
+	echo "|____________________|"
+
+	if [ -d toolchain ]
+	then
+		echo Toolchain already exist! Nothing to do.
+	else
+		echo Creating toolchain...
+		mkdir toolchain
+		sh ${ndk_dir}/build/tools/make-standalone-toolchain.sh --platform=android-${android_api} --install-dir=toolchain
+		
+		if [ $? -ne 0 ]
+		then
+			rm -fr toolchain
+			exit_error
+		fi
+	fi
+
+	export CC=arm-linux-androideabi-gcc
+	export RANLIB=arm-linux-androideabi-ranlib
+	export AR=arm-linux-androideabi-ar
+	export LD=arm-linux-androideabi-ld
+	export PATH=`pwd`/toolchain/bin:$PATH
+}
+
+# download & untar libpcap + tcpdump
+{
+	echo " _______________________________"
+	echo "|                               |"
+	echo "| DOWNLOADING LIBPCAP & TCPDUMP |"
+	echo "|_______________________________|"
+	
+	tcpdump_file=${tcpdump_dir}.tar.gz
+	libpcap_file=${libpcap_dir}.tar.gz
+	tcpdump_link=http://www.tcpdump.org/release/${tcpdump_file}
+	libpcap_link=http://www.tcpdump.org/release/${libpcap_file}
+	
+	if [ -f ${tcpdump_file} ]
+	then
+		echo ${tcpdump_file} already downloaded! Nothing to do.
+	else
+		echo Download ${tcpdump_file}...
+		wget ${tcpdump_link}
+		if [ ! -f ${tcpdump_file} ]
+		then
+			exit_error
+		fi
+	fi
+	
+	if [ -f ${libpcap_file} ]
+	then
+		echo ${libpcap_file} already downloaded! Nothing to do.
+	else
+		echo Download ${libpcap_file}...
+		wget ${libpcap_link}
+		if [ ! -f ${libpcap_file} ]
+		then
+			exit_error
+		fi
+	fi
+	
+	if [ -d ${tcpdump_dir} ]
+	then
+		echo ${tcpdump_dir} directory already exist! Nothing to do.
+	else
+		echo untar ${tcpdump_file}
+		tar -zxf ${tcpdump_file}
+	fi
+	
+	if [ -d ${libpcap_dir} ]
+	then
+		echo ${libpcap_dir} directory already exist! Nothing to do.
+	else
+		echo untar ${libpcap_file}
+		tar -zxf ${libpcap_file}
+	fi
+}
+
+# build libpcap
+{
+	cd ${libpcap_dir}
+
+	echo " _____________________"
+	echo "|                     |"
+	echo "| CONFIGURING LIBPCAP |"
+	echo "|_____________________|"
+
+	chmod +x configure
+	./configure --host=arm-linux --with-pcap=linux ac_cv_linux_vers=2
+
+	if [ $? -ne 0 ]
+	then
+		exit_error
+	fi	
+
+	echo " __________________"
+	echo "|                  |"
+	echo "| BUILDING LIBPCAP |"
+	echo "|__________________|"
+
+	chmod +x runlex.sh
+	make
+
+	if [ $? -ne 0 ]
+	then
+		exit_error
+	fi
+
+	cd ..
+}
+
+# build libpcap
+{
+	cd ${tcpdump_dir}
+	
+	echo " _____________________"
+	echo "|                     |"
+	echo "| CONFIGURING TCPDUMP |"
+	echo "|_____________________|"
+	
+	chmod +x configure
+	./configure --host=arm-linux --with-pcap=linux ac_cv_linux_vers=2 --with-crypto=no
+
+	if [ $? -ne 0 ]
+	then
+		exit_error
+	fi	
+
+	echo " __________________"
+	echo "|                  |"
+	echo "| BUILDING TCPDUMP |"
+	echo "|__________________|"
+	
+	#setprotoent endprotoen not supported on android
+	sed -i".bak" "s/setprotoent/\/\/setprotoent/g" print-isakmp.c
+	sed -i".bak" "s/endprotoent/\/\/endprotoent/g" print-isakmp.c
+	
+	#NBBY is not defined => FORCE definition
+	make CFLAGS=-DNBBY=8 # for tcpdump < 4.2.1 (CFLAGS refefined in Makefile) => just make
+	
+	if [ $? -ne 0 ]
+	then
+		exit_error
+	fi
+	
+	cd ..
+}
+
+cp ${tcpdump_dir}/tcpdump .
+chmod +x tcpdump
+
+echo " __________________"
+echo "|                  |"
+echo "| TCPDUMP IS READY |"
+echo "|__________________|"
+echo `pwd`/tcpdump
