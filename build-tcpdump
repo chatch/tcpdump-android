@@ -9,22 +9,19 @@
 #
 # You have to define your android NDK directory before calling this script
 # example:
-# $ export NDK=/home/Workspace/android-ndk-r8
+# $ export NDK=/home/Workspace/android-ndk-r10e
 # $ sh build-tcpdump
 #
-# functionnal
-# 	with tcpdump 4.3.0, 4.2.1
-# 	with android-ndk-r8
 # --------------------------------------
 
-# default, edit version 
+# default, edit versions
 tcpdump_ver=4.7.4
 libpcap_ver=1.7.4
 android_api_def=21
 toolchain=arm-linux-androideabi-4.9
+ndk_dir_def=android-ndk-r10e
 
 #-------------------------------------------------------#
-ndk_dir_def=android-ndk-r10e
 
 tcpdump_dir=tcpdump-${tcpdump_ver}
 libpcap_dir=libpcap-${libpcap_ver}
