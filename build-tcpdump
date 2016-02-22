@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # --------------------------------------
 #
@@ -18,12 +18,13 @@
 # --------------------------------------
 
 # default, edit version 
-tcpdump_ver=4.4.0
-libpcap_ver=1.4.0
-android_api_def=9
+tcpdump_ver=4.7.4
+libpcap_ver=1.7.4
+android_api_def=21
+toolchain=arm-linux-androideabi-4.9
 
 #-------------------------------------------------------#
-ndk_dir_def=android-ndk-r9
+ndk_dir_def=android-ndk-r10e
 
 tcpdump_dir=tcpdump-${tcpdump_ver}
 libpcap_dir=libpcap-${libpcap_ver}
@@ -92,7 +93,7 @@ exit_error()
 	else
 		echo Creating toolchain...
 		mkdir toolchain
-		sh ${ndk_dir}/build/tools/make-standalone-toolchain.sh --platform=android-${android_api} --install-dir=toolchain
+		bash ${ndk_dir}/build/tools/make-standalone-toolchain.sh --toolchain=${toolchain} --platform=android-${android_api} --install-dir=toolchain
 		
 		if [ $? -ne 0 ]
 		then
@@ -102,6 +103,7 @@ exit_error()
 	fi
 
 	export CC=arm-linux-androideabi-gcc
+    export CFLAGS="-fPIE -pie"
 	export RANLIB=arm-linux-androideabi-ranlib
 	export AR=arm-linux-androideabi-ar
 	export LD=arm-linux-androideabi-ld
@@ -171,7 +173,7 @@ exit_error()
 	echo "|_____________________|"
 
 	chmod +x configure
-	./configure --host=arm-linux --with-pcap=linux ac_cv_linux_vers=2
+	./configure --host=arm-linux --with-pcap=linux
 
 	if [ $? -ne 0 ]
 	then
@@ -194,7 +196,7 @@ exit_error()
 	cd ..
 }
 
-# build libpcap
+# build tcpdump
 {
 	cd ${tcpdump_dir}
 	
@@ -204,7 +206,7 @@ exit_error()
 	echo "|_____________________|"
 	
 	chmod +x configure
-	./configure --host=arm-linux --with-pcap=linux ac_cv_linux_vers=2 --with-crypto=no
+	./configure --host=arm-linux --with-pcap=linux
 
 	if [ $? -ne 0 ]
 	then
