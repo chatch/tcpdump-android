@@ -28,13 +28,13 @@ Install the [Android NDK](https://developer.android.com/tools/sdk/ndk/index.html
 
 Install on Droid
 ----------------
-    > adb push tcpdumpbuild/tcpdump /sdcard
+    > adb root
+    > adb remount
+    > adb push tcpdumpbuild/tcpdump /system/xbin/tcpdump
     > adb shell
-    # su
     # mount | grep system
+or  # grep system /proc/mounts
     /dev/block/xxxxxxxx /system ext4 ro,relatime,barrier=1,data=ordered 0 0
-    # mount -o remount,rw /dev/block/xxxxxxxx /system
-    # cp /sdcard/tcpdump /system/bin/tcpdump
     # mount -o remount,ro /dev/block/xxxxxxxx /system
 
 Run
