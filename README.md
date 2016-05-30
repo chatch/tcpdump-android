@@ -8,6 +8,21 @@ Build
 -----
 Install the [Android NDK](https://developer.android.com/tools/sdk/ndk/index.html) then:  
 
+    gpg --recv-key E089DEF1D9C15D0D
+        gpg: requesting key D9C15D0D from hkp server keys.gnupg.net
+        gpg: key D9C15D0D: "The Tcpdump Group (Package signing key) <release@tcpdump.org>" 2 new signatures
+        gpg: 3 marginal(s) needed, 1 complete(s) needed, PGP trust model
+        gpg: depth: 0  valid:   2  signed:  27  trust: 0-, 0q, 0n, 0m, 0f, 2u
+        gpg: depth: 1  valid:  27  signed:  20  trust: 18-, 0q, 0n, 6m, 3f, 0u
+        gpg: next trustdb check due at 2016-11-28
+        gpg: Total number processed: 1
+        gpg:         new signatures: 2
+
+    gpg --fingerprint E089DEF1D9C15D0D
+        pub   3104R/D9C15D0D 2013-05-13 [expires: 2023-05-11]
+              Key fingerprint = 1F16 6A57 42AB B9E0 249A  8D30 E089 DEF1 D9C1 5D0D
+        uid                  The Tcpdump Group (Package signing key) <release@tcpdump.org>
+
     export NDK=/ndk/is/here  
     ./build-tcpdump
 

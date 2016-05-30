@@ -125,11 +125,19 @@ exit_error()
 	else
 		echo Download ${tcpdump_file}...
 		wget ${tcpdump_link}
+		wget ${tcpdump_link}.sig
 		if [ ! -f ${tcpdump_file} ]
 		then
 			exit_error
 		fi
 	fi
+
+	gpg --verify ${tcpdump_file}.sig
+	if [ $? -ne 0 ]
+	then
+		exit_error
+	fi
+
 	
 	if [ -f ${libpcap_file} ]
 	then
@@ -137,11 +145,19 @@ exit_error()
 	else
 		echo Download ${libpcap_file}...
 		wget ${libpcap_link}
+		wget ${libpcap_link}.sig
 		if [ ! -f ${libpcap_file} ]
 		then
 			exit_error
 		fi
 	fi
+
+	gpg --verify ${libpcap_file}.sig
+	if [ $? -ne 0 ]
+	then
+		exit_error
+	fi
+
 	
 	if [ -d ${tcpdump_dir} ]
 	then
