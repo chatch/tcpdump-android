@@ -19,7 +19,6 @@ tcpdump_ver=4.7.4
 libpcap_ver=1.4.0
 libpcap_ver=1.7.4
 android_api_def=21
-toolchain=x86-linux-androideabi-4.9
 toolchain=x86-4.9
 topdir=$(pwd)
 
@@ -94,8 +93,6 @@ exit_error()
 	else
 		echo Creating toolchain... ${toolchain}
 		mkdir toolchain
-		# bash ${ndk_dir}/build/tools/make-standalone-toolchain.sh  --system=linux-x86_64 --toolchain=${toolchain} --platform=android-${android_api} --install-dir=toolchain
-		echo bash ${ndk_dir}/build/tools/make-standalone-toolchain.sh    --arch=x86 ---toolchain=${toolchain} --platform=android-${android_api} --install-dir=toolchain
 		bash ${ndk_dir}/build/tools/make-standalone-toolchain.sh   --arch=x86 --toolchain=${toolchain} --platform=android-${android_api} --install-dir=toolchain
 		
 		if [ $? -ne 0 ]
@@ -105,9 +102,8 @@ exit_error()
 		fi
 	fi
 
-        cross=i686-linux-android
         cross=$(find $topdir/tcpdumpbuild/toolchain/ -name "*-gcc" |awk -F '/' \
-          '{printf("%s\n", $(NF))}'|sed -e 's/-gcc//' \
+          '{printf("%s\n", $(NF))}' | sed -e 's/-gcc//' \
           )
 	export CC=${cross}-gcc
         export CFLAGS="-fPIE -pie"

@@ -100,7 +100,7 @@ exit_error()
 	fi
 
 	export CC=arm-linux-androideabi-gcc
-    export CFLAGS="-fPIE -pie"
+        export CFLAGS="-fPIE -pie"
 	export RANLIB=arm-linux-androideabi-ranlib
 	export AR=arm-linux-androideabi-ar
 	export LD=arm-linux-androideabi-ld
