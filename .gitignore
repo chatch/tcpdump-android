@@ -1,0 +1,48 @@
+# Object files
+*.o
+*.ko
+*.obj
+*.elf
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Libraries
+*.lib
+*.a
+*.la
+*.lo
+
+# Shared objects (inc. Windows DLLs)
+*.dll
+*.so
+*.so.*
+*.dylib
+
+# Executables
+*.exe
+*.out
+*.app
+*.i*86
+*.x86_64
+*.hex
+*.swp
+tags
+./test*.lua
+
+# Debug files
+*.dSYM/
+.tmp/
+build/*
+.phony__test_target
+t.lua
+
+.phony_target
+.build
+src/obj/*
+src/bin/*
+./build/*
+./.vs/*
+
+*buildenv.sh
