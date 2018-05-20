@@ -16,9 +16,12 @@
 
 # default, edit versions
 tcpdump_ver=4.7.4
+libpcap_ver=1.4.0
 libpcap_ver=1.7.4
 android_api_def=21
-toolchain=arm-linux-androideabi-4.9
+toolchain=x86-4.9
+topdir=$(pwd)
+
 ndk_dir_def=android-ndk-r10e
 
 #-------------------------------------------------------#
@@ -88,9 +91,9 @@ exit_error()
 	then
 		echo Toolchain already exist! Nothing to do.
 	else
-		echo Creating toolchain...
+		echo Creating toolchain... ${toolchain}
 		mkdir toolchain
-		bash ${ndk_dir}/build/tools/make-standalone-toolchain.sh --toolchain=${toolchain} --platform=android-${android_api} --install-dir=toolchain
+		bash ${ndk_dir}/build/tools/make-standalone-toolchain.sh   --arch=x86 --toolchain=${toolchain} --platform=android-${android_api} --install-dir=toolchain
 		
 		if [ $? -ne 0 ]
 		then
@@ -99,11 +102,14 @@ exit_error()
 		fi
 	fi
 
-	export CC=arm-linux-androideabi-gcc
+        cross=$(find $topdir/tcpdumpbuild/toolchain/ -name "*-gcc" |awk -F '/' \
+          '{printf("%s\n", $(NF))}' | sed -e 's/-gcc//' \
+          )
+	export CC=${cross}-gcc
         export CFLAGS="-fPIE -pie"
-	export RANLIB=arm-linux-androideabi-ranlib
-	export AR=arm-linux-androideabi-ar
-	export LD=arm-linux-androideabi-ld
+	export RANLIB=${cross}-ranlib
+	export AR=${cross}-ar
+	export LD=${cross}-ld
 	export PATH=`pwd`/toolchain/bin:$PATH
 }
 
@@ -186,7 +192,7 @@ exit_error()
 	echo "|_____________________|"
 
 	chmod +x configure
-	./configure --host=arm-linux --with-pcap=linux
+	./configure --host=x86-linux --with-pcap=linux
 
 	if [ $? -ne 0 ]
 	then
@@ -219,7 +225,7 @@ exit_error()
 	echo "|_____________________|"
 	
 	chmod +x configure
-	./configure --host=arm-linux --with-pcap=linux
+	./configure --host=x86-linux --with-pcap=linux
 
 	if [ $? -ne 0 ]
 	then
